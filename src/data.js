@@ -79,7 +79,7 @@ export const DATA = {
       items: ["Python", "C", "JavaScript", "SQL","Java",]
     },
     {
-      title: "Web Development",
+      title: "Full Stack Development",
       items: [
         "HTML5",
         "CSS3",
@@ -87,7 +87,28 @@ export const DATA = {
         "Vite",
         "Responsive Design",
         "MySQL",
-        "Supabase"
+        "Supabase",
+        "PostgreSQL"
+      ]
+    },
+    {
+      title: "Backend & APIs",
+      items: [
+        "Flask",
+        "REST API Development",
+        "API Integration",
+        "HTTP", 
+        "JSON",
+        "Authentication",
+        "CRUD"
+      ]
+    },
+    {
+      title: "Cloud & Deployment",
+      items: [
+        "Google Cloud Platform (project experience)",
+        "Azure",
+        "AWS (foundational knowledge)" 
       ]
     },
     {
@@ -113,10 +134,10 @@ export const DATA = {
         "Git",
         "GitHub",
         "VS Code",
-        "Vercel",
-        "AWS"
+        "Vercel"
       ]
     }
+    
   ],
 
   /* PROJECTS */
