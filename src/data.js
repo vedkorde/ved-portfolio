@@ -13,7 +13,8 @@ export const DATA = {
     "Cybersecurity Enthusiast",
     "Full-Stack Developer",
     "CTF Player",
-    "Python Tool Builder"
+    "Python Tool Builder",
+    "Cloud Devloper"
   ],
 
   tagline:
@@ -34,9 +35,9 @@ export const DATA = {
 
   terminal: [
     "$ whoami",
-    "ved korde",
+    "Ved Korde",
     "$ cat focus.txt",
-    "cybersecurity + full-stack development",
+    "Full-stack development + Cybersecurity",
     "$ ./status.sh",
     "developer. security enthusiast. problem solver."
   ],
@@ -46,25 +47,25 @@ export const DATA = {
   stats: [
     {
       p: "",
-      n: 8,
+      n: 10,
       s: "+",
       l: "cybersecurity tools developed"
     },
     {
       p: "",
-      n: 3,
+      n: 5,
       s: "+",
       l: "development technologies"
     },
     {
       p: "",
-      n: 4,
+      n: 6,
       s: "+",
       l: "cybersecurity domains explored"
     },
     {
       p: "",
-      n: 1,
+      n: 14,
       s: "",
       l: "full-stack development focus"
     }
@@ -75,7 +76,7 @@ export const DATA = {
   skills: [
     {
       title: "Programming Languages",
-      items: ["Python", "C", "JavaScript", "SQL"]
+      items: ["Python", "C", "JavaScript", "SQL","Java",]
     },
     {
       title: "Web Development",
@@ -84,7 +85,9 @@ export const DATA = {
         "CSS3",
         "React.js",
         "Vite",
-        "Responsive Design"
+        "Responsive Design",
+        "MySQL",
+        "Supabase"
       ]
     },
     {
@@ -92,7 +95,10 @@ export const DATA = {
       items: [
         "Nmap",
         "Wireshark",
+        "Metasploit",
+        "Burp suite",
         "ExifTool",
+        "Ghidhra",
         "Steganography"
       ]
     },
@@ -100,12 +106,15 @@ export const DATA = {
       title: "Tools & Platforms",
       items: [
         "Kali Linux",
+        "Arch Linux",
+        "RedHat Linux",
         "Windows",
         "VirtualBox",
         "Git",
         "GitHub",
         "VS Code",
-        "Vercel"
+        "Vercel",
+        "AWS"
       ]
     }
   ],

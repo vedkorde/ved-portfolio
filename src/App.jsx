@@ -201,7 +201,8 @@ function Background() {
     const CH = "01{}<>/=;$#%&*+ABCDEF0123456789アイウエオカキクケコサシスセソタチツテト".split("");
 
     let w = 0, hh = 0, layers = [], raf;
-    let frame = 0, vel = 0, lastY = scrollY;
+    let frame = 0, vel = 0, lastY = scrollY, lastFrame = 0;
+    const mobile = matchMedia("(max-width: 700px)").matches;
 
     let cols = [
       [91, 124, 255],
@@ -243,7 +244,7 @@ function Background() {
       size,
       alpha,
       z,
-      trail: Math.round(9 + z * 7),
+      trail: Math.round((w < 700 ? 6 : 9) + z * (w < 700 ? 3 : 7)),
       cols: Array.from(
         { length: Math.ceil(w / gap) },
         (_, i) => ({
@@ -256,7 +257,7 @@ function Background() {
     });
 
     const resize = () => {
-      const dpr = Math.min(devicePixelRatio || 1, 2);
+      const dpr = Math.min(devicePixelRatio || 1, mobile ? 1.25 : 1.5);
 
       w = innerWidth;
       hh = innerHeight;
@@ -271,15 +272,22 @@ function Background() {
 
       const small = w < 700;
 
-      layers = [
-        mk(12, small ? 30 : 22, 0.7, 0.3, 0.4),
-        mk(17, small ? 44 : 34, 1.5, 0.55, 1)
-      ];
+      layers = small
+        ? [mk(13, 46, 0.55, 0.32, 0.55)]
+        : [
+            mk(12, 28, 0.7, 0.3, 0.4),
+            mk(17, 38, 1.25, 0.48, 1)
+          ];
 
       if (REDUCE) draw();
     };
 
-    const draw = () => {
+    const draw = (now = 0) => {
+      if (mobile && now - lastFrame < 32) {
+        raf = requestAnimationFrame(draw);
+        return;
+      }
+      lastFrame = now;
       frame++;
 
       if (frame % 40 === 1) readCols();
@@ -353,20 +361,25 @@ function Background() {
       mouse.y = e.clientY;
     };
 
+    const visibility = () => {
+      cancelAnimationFrame(raf);
+      if (!document.hidden && !REDUCE) raf = requestAnimationFrame(draw);
+    };
+
     resize();
     readCols();
 
     addEventListener("resize", resize);
-    addEventListener("mousemove", mm);
+    if (!mobile) addEventListener("mousemove", mm);
+    document.addEventListener("visibilitychange", visibility);
 
-    if (!REDUCE) {
-      raf = requestAnimationFrame(draw);
-    }
+    if (!REDUCE && !document.hidden) raf = requestAnimationFrame(draw);
 
     return () => {
       cancelAnimationFrame(raf);
       removeEventListener("resize", resize);
-      removeEventListener("mousemove", mm);
+      if (!mobile) removeEventListener("mousemove", mm);
+      document.removeEventListener("visibilitychange", visibility);
     };
   }, []);
 
@@ -730,6 +743,10 @@ function Skills() {
       text: "Technologies & Expertise."
     }),
 
+    h("p", {
+      className: "skills-intro"
+    }, "A practical toolkit built through coding, web projects, cybersecurity labs and continuous hands-on learning."),
+
     h("div", {
       className: "skill-dashboard"
     },
@@ -978,70 +995,69 @@ function Card({ p }) {
 /* ---------- projects ---------- */
 
 function Work() {
-  const sec = useRef(null);
   const track = useRef(null);
   const bar = useRef(null);
 
+  const scrollProjects = (direction) => {
+    const el = track.current;
+    if (!el) return;
+    el.scrollBy({ left: direction * Math.max(280, el.clientWidth * 0.82), behavior: REDUCE ? "auto" : "smooth" });
+  };
+
   useEffect(() => {
-    return onScrollFrame(() => {
-      const s = sec.current;
-      const t = track.current;
+    const el = track.current;
+    const indicator = bar.current;
+    if (!el) return;
 
-      if (!s || !t) return;
+    const update = () => {
+      const max = el.scrollWidth - el.clientWidth;
+      const progress = max > 0 ? el.scrollLeft / max : 0;
+      if (indicator) indicator.style.transform = "scaleX(" + progress + ")";
+    };
 
-      const dist = Math.max(0, t.scrollWidth - innerWidth);
+    el.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    update();
+    requestAnimationFrame(update);
 
-      s.style.height = (dist + innerHeight) + "px";
-
-      const rect = s.getBoundingClientRect();
-
-      const prog = dist > 0
-        ? Math.min(1, Math.max(0, -rect.top / dist))
-        : 0;
-
-      t.style.transform =
-        "translate3d(" + (-prog * dist) + "px,0,0)";
-
-      if (bar.current) {
-        bar.current.style.transform = "scaleX(" + prog + ")";
-      }
-    });
+    return () => {
+      el.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
   }, []);
+
+  const onTrackKeyDown = (e) => {
+    if (e.key === "ArrowRight") { e.preventDefault(); scrollProjects(1); }
+    if (e.key === "ArrowLeft") { e.preventDefault(); scrollProjects(-1); }
+  };
 
   return h("section", {
     id: "work",
-    className: "work",
-    ref: sec
+    className: "work sec-work"
   },
-
-    h("div", { className: "pin" },
-
-      h("div", { className: "work-head" },
-
-        h(Split, {
-          text: "Selected work"
-        }),
-
-        h("div", {
-          className: "bar",
-          "aria-hidden": "true"
-        },
+    h("div", { className: "work-head" },
+      h(Split, { text: "Selected work" }),
+      h("div", { className: "work-head-actions" },
+        h("div", { className: "bar", "aria-hidden": "true" },
           h("i", { ref: bar })
-        )
-      ),
-
-      h("div", {
-        className: "track",
-        ref: track
-      },
-        DATA.projects.map(p =>
-          h(Card, {
-            key: p.title,
-            p
-          })
+        ),
+        h("div", { className: "work-arrows", "aria-label": "Project navigation" },
+          h("button", { type: "button", className: "work-arrow", onClick: () => scrollProjects(-1), "aria-label": "Previous projects" }, "←"),
+          h("button", { type: "button", className: "work-arrow", onClick: () => scrollProjects(1), "aria-label": "Next projects" }, "→")
         )
       )
-    )
+    ),
+    h("div", {
+      className: "track",
+      ref: track,
+      tabIndex: 0,
+      onKeyDown: onTrackKeyDown,
+      role: "region",
+      "aria-label": "Project cards. Swipe, use arrow keys, or use the navigation buttons to view all projects."
+    },
+      DATA.projects.map(p => h(Card, { key: p.title, p }))
+    ),
+    h("p", { className: "work-hint" }, "Swipe, drag, or use the arrows to explore all projects")
   );
 }
 
@@ -1050,6 +1066,7 @@ function Work() {
 function Journey() {
   const ref = useRef(null);
   const [cnt, setCnt] = useState(0);
+  const countRef = useRef(0);
 
   useEffect(() => {
     return onScrollFrame(() => {
@@ -1074,7 +1091,10 @@ function Journey() {
         }
       });
 
-      setCnt(c);
+      if (c !== countRef.current) {
+        countRef.current = c;
+        setCnt(c);
+      }
     });
   }, []);
 
@@ -1121,8 +1141,9 @@ function Achievements() {
   const certifications = [
     "Web Devloper",
     "Full Stack Devloper",
-    "Mern-Stack in progess",
-    "Java Programming in progerss"
+    "Mern-Stack in progress",
+    "Java Programming in progress",
+    "AWS Cloud in Progress"
     
   ];
 
@@ -1220,7 +1241,7 @@ function CopyEmail() {
   return h("button", {
     className: "btn big",
     onClick: go
-  }, ok ? "Email copied" : " " + DATA.email);
+  }, ok ? "Email copied" : "" + DATA.email);
 }
 
 function Contact() {
@@ -1238,12 +1259,15 @@ function Contact() {
       style: { marginBottom: 30 }
     },
       "Based in " + DATA.location +
-      ". Reach out about projects, collaborations, team member for CTF or just to talk security."
+      ". Reach out about projects, collaborations or just to talk security."
     ),
 
     h("div", { className: "cta" },
 
-      
+      h("a", {
+        className: "btn pri big",
+        href: "mailto:" + DATA.email
+      }, "Send a message"),
 
       h(CopyEmail)
     ),
@@ -1276,7 +1300,7 @@ function Contact() {
         " " + DATA.name + " · " + DATA.location
       ),
 
-      h("span", null, "Designed and built with React")
+      
     )
   );
 }
